@@ -69,4 +69,6 @@ def run(r):
             commentIsServiced(comment.id)
 
 r = login()
-run(r)
+while True:
+	run(r)
+	sleep(300)
