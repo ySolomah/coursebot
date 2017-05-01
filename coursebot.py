@@ -3,11 +3,11 @@ import praw
 import pyrebase
 import re
 import requests
-from time import sleep
 from bs4 import BeautifulSoup
-from config import *
+from config import firebase, reddit
+from time import sleep
 
-SUBREDDITS = 'uoft'
+SUBREDDITS = 'uoft+dcs_uoft+utsc+utm'
 COURSE_NAME_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]*[1]*')
 COURSE_INFO_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]{1}[1]{1}')
 
@@ -38,7 +38,10 @@ def replaceNameWithLink(matchobj):
 
 def getCourseInfo(course_name):
     url = 'http://calendar.artsci.utoronto.ca/crs_' + course_name[:3] + '.htm'
-    request = requests.get(url)
+    try:
+    	request = requests.get(url)
+    except:
+    	return ''
     html_content = request.text
     soup = BeautifulSoup(html_content, 'lxml')
     for item in soup.find_all('a'):
@@ -56,7 +59,7 @@ def run(r):
     subreddit_comments = subreddits.comments()
     for comment in subreddit_comments:
         course_mentioned = COURSE_NAME_REGEX.search(comment.body)
-        if course_mentioned and not isCommentServiced(comment.id):
+        if course_mentioned and not isCommentServiced(comment.id) and not comment.author.name == "CourseBot":
             sleep(5)
             course_name = course_mentioned.group(0)
             reply = getCourseInfo(course_name.lower())
