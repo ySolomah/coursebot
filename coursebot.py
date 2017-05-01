@@ -94,7 +94,7 @@ def checkItem(item):
 def run(r):
     subreddits = r.subreddit(SUBREDDITS)
     subreddit_comments = subreddits.comments()
-    subreddit_submissions = subreddits.new(limit=50)
+    subreddit_submissions = subreddits.new(limit=25)
     for comment in subreddit_comments:
         checkItem(comment)
     for submission in subreddit_submissions:
