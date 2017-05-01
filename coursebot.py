@@ -69,6 +69,7 @@ def run(r):
                 post = '[Source Code](https://github.com/zuhayrx/coursebot)'
                 reply = pre + reply + post
                 comment.reply(reply)
+                print(reply)
             commentIsServiced(comment.id)
 
 r = login()
