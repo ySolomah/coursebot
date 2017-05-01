@@ -58,10 +58,10 @@ def run(r):
     subreddits = r.subreddit(SUBREDDITS)
     subreddit_comments = subreddits.comments()
     for comment in subreddit_comments:
-        course_mentioned = COURSE_NAME_REGEX.search(comment.body)
-        if course_mentioned and not isCommentServiced(comment.id) and not comment.author.name == "CourseBot":
+        course_mentioned = re.findall(COURSE_NAME_REGEX, comment.body)
+        if len(course_mentioned) == 1 and not isCommentServiced(comment.id) and not comment.author.name == "CourseBot":
             sleep(5)
-            course_name = course_mentioned.group(0)
+            course_name = course_mentioned[0]
             reply = getCourseInfo(course_name.lower())
             if reply:
                 reply = reply + '\n\n'
@@ -69,7 +69,6 @@ def run(r):
                 post = '[Source Code](https://github.com/zuhayrx/coursebot)'
                 reply = pre + reply + post
                 comment.reply(reply)
-                print(reply)
             commentIsServiced(comment.id)
 
 r = login()
