@@ -90,3 +90,4 @@ ENV/
 
 # Private info
 config.py
+adminsdk.json
