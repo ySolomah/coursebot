@@ -65,11 +65,15 @@ def getCourseInfo(course_name):
 
 # Check submissions and comments for course names and reply accordingly
 def checkItem(item):
+	skip = False
     try:
         course_mentioned = re.findall(COURSE_NAME_REGEX, item.title)
+    	lower_title = item.title.lower()
+    	if 'grade' in lower_title or 'mark' in lower_title:
+    		skip = True
     except AttributeError:
         course_mentioned = re.findall(COURSE_NAME_REGEX, item.body)
-    if len(course_mentioned) == 1 and not isServiced(item.id) and not item.author.name == "CourseBot":
+    if len(course_mentioned) == 1 and not isServiced(item.id) and not item.author.name == "CourseBot" and not skip:
         course_name = course_mentioned[0]
         reply = getCourseInfo(course_name.lower())
         if reply:
