@@ -22,12 +22,12 @@ def login():
                 user_agent = 'CourseBot v0.1')
     return r
 
-def commentIsServiced(comment_id):
-    payload = {comment_id: True}
+def updateServiced(item_id):
+    payload = {item_id: True}
     db.child("serviced").update(payload)
 
-def isCommentServiced(comment_id):
-    request = db.child("serviced").child(comment_id).get().val()
+def isServiced(item_id):
+    request = db.child("serviced").child(item_id).get().val()
     if request:
         return True
     return False
@@ -39,9 +39,9 @@ def replaceNameWithLink(matchobj):
 def getCourseInfo(course_name):
     url = 'http://calendar.artsci.utoronto.ca/crs_' + course_name[:3] + '.htm'
     try:
-    	request = requests.get(url)
+        request = requests.get(url)
     except:
-    	return ''
+        return ''
     html_content = request.text
     soup = BeautifulSoup(html_content, 'lxml')
     for item in soup.find_all('a'):
@@ -54,25 +54,34 @@ def getCourseInfo(course_name):
             pass
     return ''
 
+def checkItem(item):
+    try:
+        course_mentioned = re.findall(COURSE_NAME_REGEX, item.title)
+    except AttributeError:
+        course_mentioned = re.findall(COURSE_NAME_REGEX, item.body)
+    if len(course_mentioned) == 1 and not isServiced(item.id) and not item.author.name == "CourseBot":
+        course_name = course_mentioned[0]
+        reply = getCourseInfo(course_name.lower())
+        if reply:
+            reply = reply + '\n\n'
+            pre = '###' + course_name.upper() + ':\n\n'
+            post = '[Source Code](https://github.com/zuhayrx/coursebot)'
+            reply = pre + reply + post
+            item.reply(reply)
+            print(reply)
+        updateServiced(item.id)
+        sleep(5)
+
 def run(r):
     subreddits = r.subreddit(SUBREDDITS)
     subreddit_comments = subreddits.comments()
+    subreddit_submissions = subreddits.new(limit=50)
     for comment in subreddit_comments:
-        course_mentioned = re.findall(COURSE_NAME_REGEX, comment.body)
-        if len(course_mentioned) == 1 and not isCommentServiced(comment.id) and not comment.author.name == "CourseBot":
-            sleep(5)
-            course_name = course_mentioned[0]
-            reply = getCourseInfo(course_name.lower())
-            if reply:
-                reply = reply + '\n\n'
-                pre = '###' + course_name.upper() + ':\n\n'
-                post = '[Source Code](https://github.com/zuhayrx/coursebot)'
-                reply = pre + reply + post
-                comment.reply(reply)
-                print(reply)
-            commentIsServiced(comment.id)
+        checkItem(comment)
+    for submission in subreddit_submissions:
+        checkItem(submission)
 
 r = login()
 while True:
-	run(r)
-	sleep(300)
+    run(r)
+    sleep(300)
