@@ -77,7 +77,11 @@ def checkItem(item):
             pre = '###' + course_name.upper() + ':\n\n'
             post = '[Source Code](https://github.com/zuhayrx/coursebot)'
             reply = pre + reply + post
-            item.reply(reply)
+            try:
+            	item.reply(reply)
+            except:
+            	sleep(5)
+            	return
             print(reply)
         updateServiced(item.id)
         sleep(5)
