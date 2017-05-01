@@ -11,7 +11,7 @@ from time import sleep
 SUBREDDITS = 'uoft+dcs_uoft+utsc+utm+skule'
 
 # Regex constants
-COURSE_NAME_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]*[1]*')
+COURSE_NAME_REGEX = re.compile(r'[!]{1}[a-zA-Z]{3}\d{3}[h|H|y|Y]*[1]*')
 COURSE_INFO_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]{1}[1]{1}')
 
 # Firebase initialization
