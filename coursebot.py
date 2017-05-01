@@ -7,13 +7,18 @@ from bs4 import BeautifulSoup
 from config import firebase, reddit
 from time import sleep
 
+# Subreddits to monitor, separated by '+'
 SUBREDDITS = 'uoft+dcs_uoft+utsc+utm+skule'
+
+# Regex constants
 COURSE_NAME_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]*[1]*')
 COURSE_INFO_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]{1}[1]{1}')
 
+# Firebase initialization
 fb = pyrebase.initialize_app(firebase)
 db = fb.database()
 
+# Reddit bot login, returns reddit object used to reply with this account
 def login():
     r = praw.Reddit(username = reddit["username"],
                 password = reddit["password"],
@@ -22,20 +27,24 @@ def login():
                 user_agent = 'CourseBot v0.1')
     return r
 
+# Update firebase 'serviced' with <item_id> to avoid multiple comments by bot
 def updateServiced(item_id):
     payload = {item_id: True}
     db.child("serviced").update(payload)
 
+# Check if <item_id> has already been replied to by bot
 def isServiced(item_id):
     request = db.child("serviced").child(item_id).get().val()
     if request:
         return True
     return False
 
+# Replaces course names in descriptions with links to course pages
 def replaceNameWithLink(matchobj):
     course_name = matchobj.group(0)
     return '[' + course_name + ']' + '(http://calendar.artsci.utoronto.ca/crs_' + course_name[:3].lower() + '.htm#' + course_name + ')'
 
+# Returns the course description to be used in the bot reply
 def getCourseInfo(course_name):
     url = 'http://calendar.artsci.utoronto.ca/crs_' + course_name[:3] + '.htm'
     try:
@@ -54,6 +63,7 @@ def getCourseInfo(course_name):
             pass
     return ''
 
+# Check submissions and comments for course names and reply accordingly
 def checkItem(item):
     try:
         course_mentioned = re.findall(COURSE_NAME_REGEX, item.title)
@@ -72,6 +82,7 @@ def checkItem(item):
         updateServiced(item.id)
         sleep(5)
 
+# Start scanning subreddits and comments for matches and act accordingly
 def run(r):
     subreddits = r.subreddit(SUBREDDITS)
     subreddit_comments = subreddits.comments()
@@ -81,7 +92,10 @@ def run(r):
     for submission in subreddit_submissions:
         checkItem(submission)
 
+# Log in once
 r = login()
+
+# Every 5 minutes, scan subreddits and comments for matches and act accordingly
 while True:
     run(r)
     sleep(300)
