@@ -74,7 +74,7 @@ def checkItem(item):
     except AttributeError:
         course_mentioned = re.findall(COURSE_NAME_REGEX, item.body)
     if len(course_mentioned) == 1 and not isServiced(item.id) and not item.author.name == "CourseBot" and not skip:
-        course_name = course_mentioned[0]
+        course_name = course_mentioned[0][1:]
         reply = getCourseInfo(course_name.lower())
         if reply:
             reply = reply + '\n\n'
