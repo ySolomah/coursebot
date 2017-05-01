@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from config import firebase, reddit
 from time import sleep
 
-SUBREDDITS = 'uoft+dcs_uoft+utsc+utm'
+SUBREDDITS = 'uoft+dcs_uoft+utsc+utm+skule'
 COURSE_NAME_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]*[1]*')
 COURSE_INFO_REGEX = re.compile(r'[a-zA-Z]{3}\d{3}[h|H|y|Y]{1}[1]{1}')
 
